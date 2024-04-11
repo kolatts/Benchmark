@@ -10,6 +10,11 @@ namespace Benchmark.Cli.Binders
     /// </summary>
     public class BenchmarkDbContextBinder : BinderBase<BenchmarkDbContext>
     {
+        /// <summary>
+        /// By nature, the <see cref="BenchmarkDbContext"/> will be a singleton, primarily so the Benchmark classes can get a reference to it easily.
+        /// </summary>
+        public static BenchmarkDbContext? ContextInstance { get; private set; }
+        public static Guid InMemoryDatabaseName { get; }= Guid.NewGuid();
         protected override BenchmarkDbContext GetBoundValue(BindingContext bindingContext)
         {
             var database = bindingContext.ParseResult.GetValueForOption(DatabaseTypeOption.Value);
@@ -20,31 +25,31 @@ namespace Benchmark.Cli.Binders
                 database = DatabaseTypes.SqlServer;
             }
 
-            BenchmarkDbContext? context = null;
             AnsiConsole.Progress().SimpleColumns().Start(progress =>
             {
                 var initializationTask = progress.AddTask("Initializing BenchmarkDbContext");
-                context = new BenchmarkDbContext(GetDbContextOptions(database, connectionString).Options);
+                ContextInstance = new BenchmarkDbContext(GetDbContextOptions(database, connectionString).Options);
                 initializationTask.Complete();
-                var connectionStringServerTask= progress.AddTask($"Server: {context.Database.GetDbConnection().DataSource}");
+                var connectionStringServerTask= progress.AddTask($"Server: {ContextInstance.Database.GetDbConnection().DataSource}");
                 connectionStringServerTask.Complete();
                 var connectionStringDatabaseTask =
-                    progress.AddTask($"Database: {context.Database.GetDbConnection().Database}");
+                    progress.AddTask($"Database: {ContextInstance.Database.GetDbConnection().Database}");
                 connectionStringDatabaseTask.Complete();
                 var ensureCreatedTask = progress.AddTask($"Ensuring database is created ({database})");
-                context.Database.EnsureCreated();
+                ContextInstance.Database.EnsureCreated();
                 ensureCreatedTask.Complete();
             });
-            return context!;
+            return ContextInstance!;
         }
 
-        private static DbContextOptionsBuilder<BenchmarkDbContext> GetDbContextOptions(DatabaseTypes databaseType, string? connectionString)
+
+        public static DbContextOptionsBuilder<BenchmarkDbContext> GetDbContextOptions(DatabaseTypes databaseType, string? connectionString)
         {
             var builder = new DbContextOptionsBuilder<BenchmarkDbContext>();
             switch (databaseType)
             {
                 case DatabaseTypes.SqliteInMemory:
-                    return builder.UseSqlite($"DataSource=file:{Guid.NewGuid()}?mode=memory&cache=shared");
+                    return builder.UseSqlite($"DataSource=file:{InMemoryDatabaseName}?mode=memory&cache=shared");
                 case DatabaseTypes.LocalDb:
                     return builder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=Benchmark;Trusted_Connection=True;");
                 case DatabaseTypes.SqlServer:
