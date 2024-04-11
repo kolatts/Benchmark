@@ -1,8 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace Benchmark.Data.Entities.KeyTypes;
 
-namespace Benchmark.Data.Entities.KeyTypes;
-
-public class GuidPrimaryKeyChildEntity
+public class GuidPrimaryKeyChildEntity : IPrimaryKeyEntity
 {
     public Guid GuidPrimaryKeyChildEntityId { get; set; } = Guid.NewGuid();
     [StringLength(1000)]

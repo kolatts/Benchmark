@@ -1,5 +1,4 @@
 ﻿using Benchmark.Data.Entities.KeyTypes;
-using Microsoft.EntityFrameworkCore;
 
 namespace Benchmark.Data;
 

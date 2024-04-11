@@ -1,8 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace Benchmark.Data.Entities.KeyTypes;
 
-namespace Benchmark.Data.Entities.KeyTypes;
-
-public class ShortPrimaryKeyChildEntity
+public class ShortPrimaryKeyChildEntity : IPrimaryKeyEntity
 {
     public short ShortPrimaryKeyChildEntityId { get; set; }
     [StringLength(1000)]

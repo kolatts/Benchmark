@@ -1,6 +1,4 @@
-﻿using Spectre.Console;
-
-namespace Benchmark.Cli;
+﻿namespace Benchmark.Cli;
 
 public static class Display
 {

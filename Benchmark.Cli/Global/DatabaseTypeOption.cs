@@ -1,5 +1,4 @@
 ﻿using System.CommandLine.Binding;
-using System.CommandLine;
 using Benchmark.Data;
 
 namespace Benchmark.Cli.Global
