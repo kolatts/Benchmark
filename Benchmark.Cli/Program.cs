@@ -1,10 +1,18 @@
 ﻿using System.CommandLine.Parsing;
 using Benchmark.Cli;
+using Benchmark.Cli.Binders;
+using Benchmark.Cli.Commands;
 using Benchmark.Cli.Global;
+using Benchmark.Data;
+using Microsoft.EntityFrameworkCore;
 
-var rootCommand = new RootCommand("Benchmark CLI") { Name = "benchmark" };
+var rootCommand = new RootCommand("EF Benchmark CLI") { Name = "ef-bench" };
+//Global Options
 rootCommand.AddGlobalOption(DatabaseTypeOption.Value);
 rootCommand.AddGlobalOption(ConnectionStringOption.Value);
+//Commands
+rootCommand.AddPrimaryKeyCommand();
+
 
 var parser = new CommandLineBuilder(rootCommand)
     .UseDefaults()

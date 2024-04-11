@@ -20,7 +20,22 @@ namespace Benchmark.Cli.Binders
                 database = DatabaseTypes.SqlServer;
             }
 
-            return new BenchmarkDbContext(GetDbContextOptions(database, connectionString).Options);
+            BenchmarkDbContext? context = null;
+            AnsiConsole.Progress().SimpleColumns().Start(progress =>
+            {
+                var initializationTask = progress.AddTask("Initializing BenchmarkDbContext");
+                context = new BenchmarkDbContext(GetDbContextOptions(database, connectionString).Options);
+                initializationTask.Complete();
+                var connectionStringServerTask= progress.AddTask($"Server: {context.Database.GetDbConnection().DataSource}");
+                connectionStringServerTask.Complete();
+                var connectionStringDatabaseTask =
+                    progress.AddTask($"Database: {context.Database.GetDbConnection().Database}");
+                connectionStringDatabaseTask.Complete();
+                var ensureCreatedTask = progress.AddTask($"Ensuring database is created ({database})");
+                context.Database.EnsureCreated();
+                ensureCreatedTask.Complete();
+            });
+            return context!;
         }
 
         private static DbContextOptionsBuilder<BenchmarkDbContext> GetDbContextOptions(DatabaseTypes databaseType, string? connectionString)
@@ -31,7 +46,7 @@ namespace Benchmark.Cli.Binders
                 case DatabaseTypes.SqliteInMemory:
                     return builder.UseSqlite($"DataSource=file:{Guid.NewGuid()}?mode=memory&cache=shared");
                 case DatabaseTypes.LocalDb:
-                    return builder.UseSqlServer("Server=localhost;Database=Benchmark;Trusted_Connection=True;");
+                    return builder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=Benchmark;Trusted_Connection=True;");
                 case DatabaseTypes.SqlServer:
                     return builder.UseSqlServer(connectionString);
                 default:
