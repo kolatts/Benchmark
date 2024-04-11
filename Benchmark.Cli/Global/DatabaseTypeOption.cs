@@ -4,18 +4,18 @@ using Benchmark.Data;
 
 namespace Benchmark.Cli.Global
 {
-    public static class DatabaseOption
+    public static class DatabaseTypeOption
     {
         private static Option<DatabaseTypes> Initialize()
         {
-            var option = new Option<DatabaseTypes>("--db", () => DatabaseTypes.SqliteInMemory, "The database to target");
+            var option = new Option<DatabaseTypes>("--db", () => DatabaseTypes.SqliteInMemory, "The database type to target.");
             option.AddAlias("-d");
             return option;
         }
 
         public static Option<DatabaseTypes> Value { get; } = Initialize();
 
-        public static DatabaseTypes GetGlobalEnvironmentOption(this BindingContext bindingContext)
+        public static DatabaseTypes GetGlobalDatabaseTypeOption(this BindingContext bindingContext)
         {
             return bindingContext.ParseResult.GetValueForOption(Value);
         }
