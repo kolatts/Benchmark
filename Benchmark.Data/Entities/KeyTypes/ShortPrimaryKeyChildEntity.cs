@@ -1,8 +1,8 @@
 ﻿namespace Benchmark.Data.Entities.KeyTypes;
 
-public class ShortPrimaryKeyChildEntity : IPrimaryKeyEntity
+public class ShortPrimaryKeyChildEntity : IPrimaryKeyChildEntity<short>
 {
-    public short ShortPrimaryKeyChildEntityId { get; set; }
+    public int Id { get; set; }
     [StringLength(1000)]
     public string? Description { get; set; }
     public virtual ShortPrimaryKeyEntity Parent { get; set; } = null!;

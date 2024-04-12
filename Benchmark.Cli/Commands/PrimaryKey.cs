@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Benchmark.Cli.Binders;
 using Benchmark.Data;
+using Benchmark.Data.Entities.KeyTypes;
 using Benchmark.Data.Seeding;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
@@ -17,7 +18,7 @@ namespace Benchmark.Cli.Commands
     {
         public static RootCommand AddPrimaryKeyCommand(this RootCommand rootCommand)
         {
-            var countArgument = new Argument<int>("count", () => 1000, "Number of parent entities to seed.");
+            var countArgument = new Argument<int>("count", () => 255, "Number of parent entities to seed.");
             var seedOption = new Option<int>("--use-seed", () => 1,
                 "Uses a specified seed value for randomization of text.");
             var descriptionLengthOption = new Option<int>("--textLength", () => 100,
@@ -44,60 +45,132 @@ namespace Benchmark.Cli.Commands
             parameterTable.AddRow("Description Length", descriptionLength.ToString());
             parameterTable.AddRow("Children Count", childrenCount.ToString());
             AnsiConsole.Write(parameterTable);
+            var test = context.IntPrimaryKeyEntities.Count();
+            Display.LogInformation(test.ToString());
             AnsiConsole.Progress().SimpleColumns().Start(progress =>
             {
                 var seedTask = progress.AddTask("Seed entities (delete existing)");
                 context.SeedPrimaryKeyEntities(true, count, seed, descriptionLength, childrenCount);
                 seedTask.Complete();
+                Display.LogInformation("Seed complete");
             });
-            BenchmarkRunner.Run<PrimaryKeyTest>();
+            BenchmarkRunner.Run<PrimaryKeySelectTests>();
+            AnsiConsole.Prompt(new ConfirmationPrompt("Press any enter when ready for next test."));
+            BenchmarkRunner.Run<PrimaryKeyInsertTests>();
+            if (context.DatabaseType != DatabaseTypes.SqlServer)
+                context.Database.EnsureDeleted();
         }
-        [InProcess]
-        public class PrimaryKeyTest
+        public class PrimaryKeySelectTests
         {
-            public PrimaryKeyTest()
-            {
-                if (BenchmarkDbContextBinder.ContextInstance == null)
-                    throw new ArgumentException(
-                        "The BenchmarkDbContextBinder did not initialize the context instance for use by benchmark classes.");
-                _context = BenchmarkDbContextBinder.ContextInstance;
-            }
-            private readonly BenchmarkDbContext _context;
-            public const string StaticText = "Static Text";
 
-            [Benchmark(Description = "Int(32) - Join to Child - Select child data")]
+            private BenchmarkDbContext _context;
+            [GlobalSetup]
+            public void Setup()
+            {
+                _context = BenchmarkDbContextBinder.GetDbContextFromEnvironmentVariables();
+            }
+            public const string StaticText = "Static Text";
+            [Benchmark(Description = "Byte(8) - Join to Child - Select child text")]
+            public List<string?> BytePrimaryKeyJoinToSelectChildData() => _context.BytePrimaryKeyEntities
+                .SelectMany(x => x.Children.Select(y => y.Description))
+                .ToList();
+            [Benchmark(Description = "Short(16) - Join to Child - Select child text")]
+            public List<string?> ShortPrimaryKeyJoinToSelectChildData() => _context.ShortPrimaryKeyEntities
+                .SelectMany(x => x.Children.Select(y => y.Description))
+                .ToList();
+            [Benchmark(Description = "Int(32) - Join to Child - Select child text")]
             public List<string?> IntPrimaryKeyJoinToSelectChildData() => _context.IntPrimaryKeyEntities
                 .SelectMany(x => x.Children.Select(y => y.Description))
-                .ToList();
-            [Benchmark(Description = "Int(32) - Join to Child - Select static text")]
-            public List<string> IntPrimaryKeyJoinToSelectStaticText() => _context.IntPrimaryKeyEntities
-                .SelectMany(x => x.Children.Select(y => StaticText))
-                .ToList();
-            [Benchmark(Description = "Guid - Join to Child - Select child text")]
-            public List<string?> GuidPrimaryKeyJoinToSelectChildData() => _context.GuidPrimaryKeyEntities
-                .SelectMany(x => x.Children.Select(y => y.Description))
-                .ToList();
-            [Benchmark(Description = "Guid - Join to Child - Select static text")]
-            public List<string> GuidPrimaryKeyJoinToSelectStaticText() => _context.GuidPrimaryKeyEntities
-                .SelectMany(x => x.Children.Select(y => StaticText))
-                .ToList();
-            [Benchmark(Description = "String - Join to Child - Select child text")]
-            public List<string?> StringPrimaryKeyJoinToSelectChildData() => _context.StringPrimaryKeyEntities
-                .SelectMany(x => x.Children.Select(y => y.Description))
-                .ToList();
-            [Benchmark(Description = "String - Join to Child - Select static text")]
-            public List<string> StringPrimaryKeyJoinToSelectStaticText() => _context.StringPrimaryKeyEntities
-                .SelectMany(x => x.Children.Select(y => StaticText))
                 .ToList();
             [Benchmark(Description = "Long(64) - Join to Child - Select child text")]
             public List<string?> LongPrimaryKeyJoinToSelectChildData() => _context.LongPrimaryKeyEntities
                 .SelectMany(x => x.Children.Select(y => y.Description))
                 .ToList();
-            [Benchmark(Description = "Long(64) - Join to Child - Select static text")]
-            public List<string> LongPrimaryKeyJoinToSelectStaticText() => _context.LongPrimaryKeyEntities
-                .SelectMany(x => x.Children.Select(y => StaticText))
+            [Benchmark(Description = "Guid - Join to Child - Select child text")]
+            public List<string?> GuidPrimaryKeyJoinToSelectChildData() => _context.GuidPrimaryKeyEntities
+                .SelectMany(x => x.Children.Select(y => y.Description))
                 .ToList();
-
+            [Benchmark(Description = "String - Join to Child - Select child text")]
+            public List<string?> StringPrimaryKeyJoinToSelectChildData() => _context.StringPrimaryKeyEntities
+                .SelectMany(x => x.Children.Select(y => y.Description))
+                .ToList();
         }
+
+        public class PrimaryKeyInsertTests
+        {
+
+            private BenchmarkDbContext _context;
+            [GlobalSetup]
+            public void Setup()
+            {
+                _context = BenchmarkDbContextBinder.GetDbContextFromEnvironmentVariables();
+            }
+            public const string StaticText = "Static Text";
+
+            [Benchmark(Description = "Byte(8) - Insert with Child")]
+            public void ByteInsertWithChild()
+            {
+                _context.BytePrimaryKeyEntities.Add(new BytePrimaryKeyEntity()
+                {
+                    Description = StaticText,
+                    Children = [new BytePrimaryKeyChildEntity(description: StaticText)]
+                });
+                _context.SaveChanges();
+            }
+
+            [Benchmark(Description = "Short(16) - Insert with Child")]
+            public void ShortInsertWithChild()
+            {
+                _context.ShortPrimaryKeyEntities.Add(new ShortPrimaryKeyEntity()
+                {
+                    Description = StaticText,
+                    Children = [new ShortPrimaryKeyChildEntity { Description = StaticText}]
+                });
+                _context.SaveChanges();
+            }
+
+            [Benchmark(Description = "Int(32) - Insert with Child")]
+            public void IntInsertWithChild()
+            {
+                _context.IntPrimaryKeyEntities.Add(new IntPrimaryKeyEntity()
+                {
+                    Description = StaticText,
+                    Children = [new IntPrimaryKeyChildEntity { Description = StaticText }]
+                });
+                _context.SaveChanges();
+            }
+            [Benchmark(Description = "Long(64) - Insert with Child")]
+            public void LongInsertWithChild()
+            {
+                _context.LongPrimaryKeyEntities.Add(new LongPrimaryKeyEntity()
+                {
+                    Description = StaticText,
+                    Children = [new LongPrimaryKeyChildEntity { Description = StaticText }]
+                });
+                _context.SaveChanges();
+            }
+
+            [Benchmark(Description = "Guid - Insert with Child")]
+            public void GuidPrimaryKeyJoinToSelectChildData()
+            {
+                _context.GuidPrimaryKeyEntities.Add(new GuidPrimaryKeyEntity()
+                {
+                    Description = StaticText,
+                    Children = [new GuidPrimaryKeyChildEntity { Description = StaticText }]
+                });
+                _context.SaveChanges();
+            }
+            [Benchmark(Description = "String - Join to Child - Select child text")]
+            public void StringPrimaryKeyJoinToSelectChildData()
+            {
+                _context.StringPrimaryKeyEntities.Add(new StringPrimaryKeyEntity()
+                {
+                    Description = StaticText,
+                    Children = [new StringPrimaryKeyChildEntity { Description = StaticText }]
+                });
+                _context.SaveChanges();
+            }
+        }
+
     }
 }

@@ -1,8 +1,8 @@
 ﻿namespace Benchmark.Data.Entities.KeyTypes;
 
-public class GuidPrimaryKeyChildEntity : IPrimaryKeyEntity
+public class GuidPrimaryKeyChildEntity : IPrimaryKeyChildEntity<Guid>
 {
-    public Guid GuidPrimaryKeyChildEntityId { get; set; } = Guid.NewGuid();
+    public int Id { get; set; } 
     [StringLength(1000)]
     public string? Description { get; set; }
     public virtual GuidPrimaryKeyEntity Parent { get; set; } = null!;

@@ -1,8 +1,8 @@
 {
   "profiles": {
-    "ef-bench primary-keys": {
+    "bench primary-keys": {
       "commandName": "Project",
-      "commandLineArgs": "primary-keys"
+      "commandLineArgs": "primary-keys "
     }
   }
 }
