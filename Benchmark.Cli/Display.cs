@@ -1,4 +1,6 @@
-﻿namespace Benchmark.Cli;
+﻿using System.Globalization;
+
+namespace Benchmark.Cli;
 
 public static class Display
 {
@@ -53,4 +55,16 @@ public static class Display
         AnsiConsole.WriteLine();
     }
 
+    public static void LogToTable(Dictionary<string, TimeSpan> dictionary, string tableTitle)
+    {
+        var table = new Table() {Title = new TableTitle(tableTitle, BrandStyle)};
+        table.AddColumn(new TableColumn("Method"));
+        table.AddColumn(new TableColumn("Time (ms)"));
+        foreach (var keyValuePair in dictionary)
+        {
+            table.AddRow(new Text(keyValuePair.Key), new Text(keyValuePair.Value.TotalMilliseconds.ToString(CultureInfo.CurrentCulture)));
+        }
+        AnsiConsole.Write(table);
+        AnsiConsole.WriteLine();
+    }
 }

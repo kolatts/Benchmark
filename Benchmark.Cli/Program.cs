@@ -1,6 +1,6 @@
 ﻿using System.CommandLine.Parsing;
 using Benchmark.Cli;
-using Benchmark.Cli.Commands;
+using Benchmark.Cli.Commands.PrimaryKeys;
 using Benchmark.Cli.Global;
 
 var rootCommand = new RootCommand("Benchmark CLI") { Name = "bench" };

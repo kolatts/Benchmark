@@ -37,6 +37,7 @@ namespace Benchmark.Data.Seeding
 
         public static void DeletePrimaryKeyEntities(this BenchmarkDbContext context)
         {
+            context.ShortPrimaryKeyEntities.ExecuteDelete();
             context.GuidPrimaryKeyEntities.ExecuteDelete();
             context.StringPrimaryKeyEntities.ExecuteDelete();
             context.IntPrimaryKeyEntities.ExecuteDelete();
