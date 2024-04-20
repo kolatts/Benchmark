@@ -29,9 +29,9 @@ public class BenchmarkDbContext(DbContextOptions<BenchmarkDbContext> options, Da
     public void ResetIdentity(string tableName)
     {
         if (Database.IsSqlServer())
-            Database.ExecuteSqlRaw($"DBCC CHECKIDENT ('{tableName}', RESEED, 0);");
+            Database.ExecuteSql($"DBCC CHECKIDENT ('{tableName}', RESEED, 0);");
         else if (Database.IsSqlite())
-            Database.ExecuteSqlRaw($"UPDATE sqlite_sequence SET seq = 0 WHERE name = '{tableName}';");
+            Database.ExecuteSql($"UPDATE sqlite_sequence SET seq = 0 WHERE name = '{tableName}';");
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

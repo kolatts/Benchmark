@@ -15,7 +15,7 @@ namespace Benchmark.Cli
 
         public void Warmup()
         {
-            Context.Database.ExecuteSqlRaw("SELECT 1");
+            Context.Database.ExecuteSql($"SELECT 1");
             var result = Context.WarmupEntities.ToList();
 
             Context.BytePrimaryKeyEntities.SelectMany(x => x.Children).Select(x => x.Description).Take(10).ToList();
