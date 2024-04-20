@@ -38,7 +38,7 @@ namespace Benchmark.Cli.Binders
                     progress.AddTask($"Database: {ContextInstance.Database.GetDbConnection().Database}");
                 connectionStringDatabaseTask.Complete();
                 var ensureCreatedTask = progress.AddTask($"Ensuring database is created ({database})");
-                if (database == DatabaseTypes.SqlServer)
+                if (ContextInstance.Database.IsSqlServer())
                     ContextInstance.Database.Migrate();
                 else
                     ContextInstance.Database.EnsureCreated();
@@ -64,8 +64,10 @@ namespace Benchmark.Cli.Binders
                     return builder.UseSqlServer(connectionString, options =>
                     {
                         options.UseAzureSqlDefaults();
-                        options.CommandTimeout(90);
                     });
+                case DatabaseTypes.SqlServerContainer:
+                    return builder.UseSqlServer(
+                        $"Server=localhost,4433;Database=Benchmark;User ID=sa;Password=P@ssw0rd;TrustServerCertificate=True;");
                 default:
                     throw new ArgumentException($"Unknown database type {databaseType}");
             }
@@ -76,7 +78,7 @@ namespace Benchmark.Cli.Binders
             if (string.IsNullOrWhiteSpace(connectionString))
                 throw new ArgumentException("Could not find the stored connection string");
             var databaseType = Enum.Parse<DatabaseTypes>(Environment.GetEnvironmentVariable(EnvironmentVariableDatabaseTypeKey, EnvironmentVariableTarget.User)!);
-         
+
             return new BenchmarkDbContext(GetDbContextOptions(databaseType, connectionString).Options, databaseType);
         }
 

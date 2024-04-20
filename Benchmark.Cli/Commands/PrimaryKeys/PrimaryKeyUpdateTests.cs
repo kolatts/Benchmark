@@ -10,7 +10,14 @@ public class PrimaryKeyUpdateTests :BaseEntityFrameworkBenchmark
 
    
     public const string StaticText = "Updated by Update Test";
-
+    [Benchmark(Description = "Additional Warmup")]
+    public List<string?> AdditionalWarmup() => Context.ShortPrimaryKeyEntities.Select(x => x.Description).Take(1)
+        .Union(Context.IntPrimaryKeyEntities.Select(x => x.Description).Take(1))
+        .Union(Context.LongPrimaryKeyEntities.Select(x => x.Description).Take(1))
+        .Union(Context.GuidPrimaryKeyEntities.Select(x => x.Description).Take(1))
+        .Union(Context.StringPrimaryKeyEntities.Select(x => x.Description).Take(1))
+        .Union(Context.BytePrimaryKeyEntities.Select(x => x.Description).Take(1))
+        .ToList();
     [Benchmark(Description = "Byte(8) - Update")]
     public void ByteUpdate()
     {

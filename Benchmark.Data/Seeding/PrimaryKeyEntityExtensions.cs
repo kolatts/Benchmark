@@ -1,6 +1,7 @@
 ﻿using Benchmark.Data.Entities.KeyTypes;
 using Bogus;
 using EFCore.BulkExtensions;
+using Microsoft.EntityFrameworkCore;
 using PrimaryKeyEntities = (
      System.Collections.Generic.List<Benchmark.Data.Entities.KeyTypes.IntPrimaryKeyEntity>,
     System.Collections.Generic.List<Benchmark.Data.Entities.KeyTypes.GuidPrimaryKeyEntity>,
@@ -15,53 +16,70 @@ namespace Benchmark.Data.Seeding
 {
     public static class PrimaryKeyEntityExtensions
     {
-        public static void SeedPrimaryKeyEntities(this BenchmarkDbContext context, bool deleteExisting, int count, int seed = 1, int descriptionLength = 100, int numberOfChildren = 1)
+        public static void SeedPrimaryKeyEntities(this BenchmarkDbContext context, bool deleteExisting, int count,  int numberOfChildren = 1)
         {
+            context.Database.SetCommandTimeout(600);
             if (deleteExisting)
                 context.DeletePrimaryKeyEntities();
-            var entities = GetEntities(count, seed, descriptionLength, numberOfChildren);
-            context.BulkInsert(entities.Item1);
-            context.BulkInsert(entities.Item1.SelectMany(x=>x.Children));
-            context.BulkInsert(entities.Item2);
-            context.BulkInsert(entities.Item2.SelectMany(x => x.Children));
-            context.BulkInsert(entities.Item3);
-            context.BulkInsert(entities.Item3.SelectMany(x => x.Children));
-            context.BulkInsert(entities.Item4);
-            context.BulkInsert(entities.Item4.SelectMany(x=>x.Children));
-            context.BulkInsert(entities.Item5);
-            context.BulkInsert(entities.Item5.SelectMany(x => x.Children));
-            context.BulkInsert(entities.Item6);
-            context.BulkInsert(entities.Item6.SelectMany(x => x.Children));
+            var entities = GetEntities(count, numberOfChildren);
+            Console.WriteLine("Created entities in memory. Starting inserts.");
+            context.BulkInsert(entities.Item1, config => config.BatchSize = 100000);
+            context.BulkInsert(entities.Item1.SelectMany(x=>x.Children), config => config.BatchSize = 100000);
+            context.BulkInsert(entities.Item2, config => config.BatchSize = 100000);
+            context.BulkInsert(entities.Item2.SelectMany(x => x.Children), config => config.BatchSize = 100000);
+            context.BulkInsert(entities.Item3, config => config.BatchSize = 100000);
+            context.BulkInsert(entities.Item3.SelectMany(x => x.Children), config => config.BatchSize = 100000);
+            context.BulkInsert(entities.Item4, config => config.BatchSize = 100000);
+            context.BulkInsert(entities.Item4.SelectMany(x=>x.Children), config => config.BatchSize = 100000);
+            context.BulkInsert(entities.Item5, config => config.BatchSize = 100000);
+            context.BulkInsert(entities.Item5.SelectMany(x => x.Children), config => config.BatchSize = 100000);
+            context.BulkInsert(entities.Item6, config => config.BatchSize = 100000);
+            context.BulkInsert(entities.Item6.SelectMany(x => x.Children), config => config.BatchSize = 100000);
         }
 
 
         public static void DeletePrimaryKeyEntities(this BenchmarkDbContext context)
         {
             context.ShortPrimaryKeyEntities.ExecuteDelete();
+            context.ShortPrimaryKeyChildEntities.ExecuteDelete();
             context.GuidPrimaryKeyEntities.ExecuteDelete();
+            context.GuidPrimaryKeyChildEntities.ExecuteDelete();
             context.StringPrimaryKeyEntities.ExecuteDelete();
+            context.StringPrimaryKeyChildEntities.ExecuteDelete();
             context.IntPrimaryKeyEntities.ExecuteDelete();
+            context.IntPrimaryKeyChildEntities.ExecuteDelete();
             context.LongPrimaryKeyEntities.ExecuteDelete();
+            context.LongPrimaryKeyChildEntities.ExecuteDelete();
             context.BytePrimaryKeyEntities.ExecuteDelete();
+            context.BytePrimaryKeyChildEntities.ExecuteDelete();
+            context.ResetIdentity(nameof(context.BytePrimaryKeyEntities));
+            context.ResetIdentity(nameof(context.BytePrimaryKeyChildEntities));
+            context.ResetIdentity(nameof(context.ShortPrimaryKeyEntities));
+            context.ResetIdentity(nameof(context.ShortPrimaryKeyChildEntities));
+            context.ResetIdentity(nameof(context.IntPrimaryKeyEntities));
+            context.ResetIdentity(nameof(context.IntPrimaryKeyChildEntities));
+            context.ResetIdentity(nameof(context.LongPrimaryKeyEntities));
+            context.ResetIdentity(nameof(context.LongPrimaryKeyChildEntities));
         }
 
-        private static PrimaryKeyEntities GetEntities(int count, int seed, int descriptionLength,
-            int numberOfChildren)
+        private static PrimaryKeyEntities GetEntities(int count, int numberOfChildren)
         {
             //We'll use Bogus for just the int entities, and then copy the values to the other entities to create more of an apples-to-apples comparison
-            var faker = new Faker<IntPrimaryKeyEntity>().UseSeed(seed)
-                .RuleFor(x => x.Description, f => f.Random.AlphaNumeric(descriptionLength));
-            var intEntities = faker.Generate(count);
-            var childIdIncrement = 1;
-            intEntities.ForEach(x =>
+            var childIncrement = 1;
+            var intEntities = Enumerable.Range(0, count).Select(x =>
             {
-                x.Id = intEntities.IndexOf(x) + 1;
+                var entity =  new IntPrimaryKeyEntity()
+                {
+                    Description = Guid.NewGuid().ToString(),
+                    Id = x + 1,
+                };
                 for (var i = 0; i < numberOfChildren; i++)
                 {
-                    x.Children.Add(new IntPrimaryKeyChildEntity() { Description = x.Description, ParentId = x.Id, Id = childIdIncrement});
-                    childIdIncrement++;
+                    entity.Children.Add(new() { Description = Guid.NewGuid().ToString(), ParentId = x + 1, Id = childIncrement,});
+                    childIncrement++;
                 }
-            });
+                return entity;
+            }).ToList();
             //We could abstract this, but it's not worth it.
             var guidEntities = intEntities.CopyFieldsInto<GuidPrimaryKeyEntity>();
             for (var i = 0; i < count; i++)
@@ -83,18 +101,17 @@ namespace Benchmark.Data.Seeding
                 longEntities[i].Children.ForEach(x=>x.ParentId = longEntities[i].Id);
             }
             //Ensure that we don't create more entities than can be stored for shorts, since these have a PK of type short.
-            var shortCount = int.Min(count, short.MaxValue);
-            var shortEntities = intEntities.CopyFieldsInto<ShortPrimaryKeyEntity>().Take(shortCount).ToList();
-            for (var i = 0; i < shortCount; i++)
+            
+            var shortEntities = count > short.MaxValue ? [] :  intEntities.CopyFieldsInto<ShortPrimaryKeyEntity>().Take(count).ToList();
+            for (var i = 0; i < shortEntities.Count; i++)
             {
                 shortEntities[i].Id = (short)intEntities[i].Id;
                 shortEntities[i].Children = intEntities[i].Children.CopyFieldsIntoChildren<ShortPrimaryKeyChildEntity,short>();
                 shortEntities[i].Children.ForEach(x=>x.ParentId = shortEntities[i].Id);
             }
             //Ensure that we don't create more entities than can be stored for bytes, since these have a PK of type byte.
-            var byteCount = int.Min(count, byte.MaxValue);
-            var byteEntities = intEntities.CopyFieldsInto<BytePrimaryKeyEntity>().Take(byteCount).ToList();
-            for (var i = 0; i < byteCount; i++)
+            var byteEntities = count > byte.MaxValue ? [] : intEntities.CopyFieldsInto<BytePrimaryKeyEntity>().Take(count).ToList();
+            for (var i = 0; i < byteEntities.Count; i++)
             {
                 byteEntities[i].Id = (byte)intEntities[i].Id;
                 byteEntities[i].Children = intEntities[i].Children.CopyFieldsIntoChildren<BytePrimaryKeyChildEntity,byte>();

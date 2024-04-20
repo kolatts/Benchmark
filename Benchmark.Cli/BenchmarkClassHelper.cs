@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 
-namespace Benchmark.Cli.Extensions
+namespace Benchmark.Cli
 {
     public static class BenchmarkClassHelper
     {
@@ -37,10 +37,19 @@ namespace Benchmark.Cli.Extensions
                 string description = benchmarkAttribute.Description;
 
                 DateTime startTime = DateTime.Now;
-                method.Invoke(benchmarkInstance, null);
-                TimeSpan executionTime = DateTime.Now - startTime;
+                try
+                {
+                    method.Invoke(benchmarkInstance, null);
+                    TimeSpan executionTime = DateTime.Now - startTime;
+                    benchmarkResults.Add(description, executionTime);
+                }
+                catch (Exception ex)
+                {
+                    Display.LogError(ex, $"Failed to run initial test on {description}");
+                    benchmarkResults.Add($"{description} (failed)", TimeSpan.Zero);
 
-                benchmarkResults.Add(description, executionTime);
+                }
+               
             }
             Display.LogInformation("Completed initial dry run of tests, now starting benchmark dotnet tests.");
             BenchmarkRunner.Run<TBenchmarkClass>();

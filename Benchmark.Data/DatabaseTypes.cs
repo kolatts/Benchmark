@@ -5,5 +5,6 @@
         SqliteInMemory,
         LocalDb,
         SqlServer,
+        SqlServerContainer
     }
 }

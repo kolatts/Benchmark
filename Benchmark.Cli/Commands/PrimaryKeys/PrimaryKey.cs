@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Benchmark.Cli.Binders;
-using Benchmark.Cli.Extensions;
 using Benchmark.Data;
 using Benchmark.Data.Entities.KeyTypes;
 using Benchmark.Data.Seeding;
@@ -19,49 +18,43 @@ namespace Benchmark.Cli.Commands.PrimaryKeys
     {
         public static RootCommand AddPrimaryKeyCommand(this RootCommand rootCommand)
         {
-            var countArgument = new Argument<int>("count", () => 255, "Number of parent entities to seed.");
-            var seedOption = new Option<int>("--use-seed", () => 1,
-                "Uses a specified seed value for randomization of text.");
-            var descriptionLengthOption = new Option<int>("--textLength", () => 100,
-                "Specifies the length of how much text in the Description fields.");
+            var countArgument = new Argument<int>("count", () => 1000000, "Number of parent entities to seed.");
+
             var childrenCount =
                 new Option<int>("--childrenCount", () => 1, "Number of children to seed with each parent.");
             var command = new Command("primary-keys",
                 "Runs tests to evaluate performance of different primary key types.")
             {
-                countArgument, seedOption, descriptionLengthOption, childrenCount,
+                countArgument, childrenCount,
             };
-            command.SetHandler(RunPrimaryKeyTest, new BenchmarkDbContextBinder(), countArgument, seedOption, descriptionLengthOption, childrenCount);
+            command.SetHandler(RunPrimaryKeyTest, new BenchmarkDbContextBinder(), countArgument, childrenCount);
             rootCommand.Add(command);
             return rootCommand;
         }
 
-        public static void RunPrimaryKeyTest(BenchmarkDbContext context, int count, int seed, int descriptionLength,
+        public static void RunPrimaryKeyTest(BenchmarkDbContext context, int count,
             int childrenCount)
         {
             var parameterTable = new Table() { Title = new TableTitle("Parameters") };
             parameterTable.AddColumns("Name", "Value");
             parameterTable.AddRow("Count", count.ToString());
-            parameterTable.AddRow("Seed", seed.ToString());
-            parameterTable.AddRow("Description Length", descriptionLength.ToString());
             parameterTable.AddRow("Children Count", childrenCount.ToString());
             AnsiConsole.Write(parameterTable);
-            var test = context.IntPrimaryKeyEntities.Count();
-            Display.LogInformation(test.ToString());
             AnsiConsole.Progress().SimpleColumns().Start(progress =>
             {
                 var seedTask = progress.AddTask("Seed entities (delete existing)");
-                context.SeedPrimaryKeyEntities(true, count, seed, descriptionLength, childrenCount);
+                context.SeedPrimaryKeyEntities(true, count, childrenCount);
                 seedTask.Complete();
                 Display.LogInformation("Seed complete");
             });
-            BenchmarkClassHelper.RunBenchmarkMethods<PrimaryKeySelectTests>();
-            AnsiConsole.Prompt(new ConfirmationPrompt("Press any enter when ready for next test."));
-            BenchmarkClassHelper.RunBenchmarkMethods<PrimaryKeyUpdateTests>();
+            BenchmarkClassHelper.RunBenchmarkMethods<PrimaryKeyDeleteTests>();
             AnsiConsole.Prompt(new ConfirmationPrompt("Press any enter when ready for next test."));
             BenchmarkClassHelper.RunBenchmarkMethods<PrimaryKeyInsertTests>();
             AnsiConsole.Prompt(new ConfirmationPrompt("Press any enter when ready for next test."));
-            BenchmarkClassHelper.RunBenchmarkMethods<PrimaryKeyDeleteTests>();
+            BenchmarkClassHelper.RunBenchmarkMethods<PrimaryKeySelectTests>();
+            AnsiConsole.Prompt(new ConfirmationPrompt("Press any enter when ready for next test."));
+            BenchmarkClassHelper.RunBenchmarkMethods<PrimaryKeyUpdateTests>();
+
 
             if (context.DatabaseType != DatabaseTypes.SqlServer)
                 context.Database.EnsureDeleted();
@@ -71,5 +64,5 @@ namespace Benchmark.Cli.Commands.PrimaryKeys
 
     }
 
-   
+
 }

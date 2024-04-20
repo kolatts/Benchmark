@@ -25,6 +25,14 @@ public class BenchmarkDbContext(DbContextOptions<BenchmarkDbContext> options, Da
 
     public DbSet<BytePrimaryKeyEntity> BytePrimaryKeyEntities { get; set; } = null!;
     public DbSet<BytePrimaryKeyChildEntity> BytePrimaryKeyChildEntities { get; set; } = null!;
+
+    public void ResetIdentity(string tableName)
+    {
+        if (Database.IsSqlServer())
+            Database.ExecuteSqlRaw($"DBCC CHECKIDENT ('{tableName}', RESEED, 0);");
+        else if (Database.IsSqlite())
+            Database.ExecuteSqlRaw($"UPDATE sqlite_sequence SET seq = 0 WHERE name = '{tableName}';");
+    }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<WarmupEntity>().HasData(Enumerable.Range(1, 1000).Select(x => new WarmupEntity() {Id = x}));
