@@ -33,15 +33,15 @@ namespace Benchmark.Cli
             }
             foreach (MethodInfo method in methods)
             {
-                BenchmarkAttribute benchmarkAttribute = method.GetCustomAttribute<BenchmarkAttribute>();
-                string description = benchmarkAttribute.Description;
+                BenchmarkAttribute? benchmarkAttribute = method.GetCustomAttribute<BenchmarkAttribute>();
+                string? description = benchmarkAttribute?.Description;
 
                 DateTime startTime = DateTime.Now;
                 try
                 {
                     method.Invoke(benchmarkInstance, null);
                     TimeSpan executionTime = DateTime.Now - startTime;
-                    benchmarkResults.Add(description, executionTime);
+                    benchmarkResults.Add(description ?? "Unknown", executionTime);
                 }
                 catch (Exception ex)
                 {
