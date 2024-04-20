@@ -6,6 +6,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UserSecretsId>9459c89a-2be1-44a6-a62e-656efa2bd6a7</UserSecretsId>
+    <PackAsTool>True</PackAsTool>
+    <PackageProjectUrl>https://github.com/kolatts/Benchmark</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/kolatts/Benchmark</RepositoryUrl>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Description>An educational tool for EF Core and SQL Server design</Description>
+    <Copyright>Sunny Kolattukudy, 2024</Copyright>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <AssemblyName>efbench</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Benchmark.Data\Benchmark.Data.csproj" />
+    <None Include="..\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>

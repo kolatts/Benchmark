@@ -3,7 +3,7 @@ using Benchmark.Cli;
 using Benchmark.Cli.Commands.PrimaryKeys;
 using Benchmark.Cli.Global;
 
-var rootCommand = new RootCommand("Benchmark CLI") { Name = "bench" };
+var rootCommand = new RootCommand("EF Benchmark CLI") { Name = "efbench" };
 //Global Options
 rootCommand.AddGlobalOption(DatabaseTypeOption.Value);
 rootCommand.AddGlobalOption(ConnectionStringOption.Value);

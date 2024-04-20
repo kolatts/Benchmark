@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Benchmark.Cli.Commands.PrimaryKeys;
 
+[InProcess]
 public class PrimaryKeyDeleteTests : BaseEntityFrameworkBenchmark
 {
 

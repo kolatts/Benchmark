@@ -7,7 +7,7 @@ namespace Benchmark.Cli.Global
     {
         private static Option<DatabaseTypes> Initialize()
         {
-            var option = new Option<DatabaseTypes>("--db", () => DatabaseTypes.LocalDb, "The database type to target.");
+            var option = new Option<DatabaseTypes>("--db", () => DatabaseTypes.SqlServerContainer, "The database type to target.");
             option.AddAlias("-d");
             return option;
         }
@@ -19,4 +19,5 @@ namespace Benchmark.Cli.Global
             return bindingContext.ParseResult.GetValueForOption(Value);
         }
     }
+
 }

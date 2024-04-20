@@ -1,11 +1,11 @@
-# Benchmark
+# efbench (Benchmark)
 A simple set of projects to run performance testing, especially with EF Core and SQL.
 
 # Getting Started
 
 1. Install with the following command:
    ```ps
-   dotnet tool install -g Benchmark.Cli
+   dotnet tool install -g efbench
    ```
 1. Run against `localdb` (Windows only)
     ```

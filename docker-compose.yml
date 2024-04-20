@@ -1,8 +1,8 @@
 # This is a docker compose file for running SQL server and Azurite locally
 version: "3.7"
 services:
-  sql-server-db:
-    container_name: sql-server-db
+  benchmark-db-sqlserver:
+    container_name: benchmark-db-sqlserver
     image: mcr.microsoft.com/mssql/server:2022-latest
     platform: linux/amd64
     ports:

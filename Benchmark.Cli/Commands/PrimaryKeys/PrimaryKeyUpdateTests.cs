@@ -4,7 +4,7 @@ using BenchmarkDotNet.Attributes;
 using Microsoft.EntityFrameworkCore;
 
 namespace Benchmark.Cli.Commands.PrimaryKeys;
-
+[InProcess]
 public class PrimaryKeyUpdateTests :BaseEntityFrameworkBenchmark
 {
 

@@ -18,7 +18,7 @@ namespace Benchmark.Cli.Commands.PrimaryKeys
     {
         public static RootCommand AddPrimaryKeyCommand(this RootCommand rootCommand)
         {
-            var countArgument = new Argument<int>("count", () => 1000000, "Number of parent entities to seed.");
+            var countArgument = new Argument<int>("count", () => 1000, "Number of parent entities to seed.");
 
             var childrenCount =
                 new Option<int>("--childrenCount", () => 1, "Number of children to seed with each parent.");
