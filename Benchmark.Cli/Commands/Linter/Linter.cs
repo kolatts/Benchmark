@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using BenchmarkDotNet.Attributes;
+using Benchmark.Cli.Commands.Linter.WarningTests;
 using BenchmarkDotNet.Running;
-using Bogus;
 
 namespace Benchmark.Cli.Commands.Linter
 {
@@ -13,52 +13,39 @@ namespace Benchmark.Cli.Commands.Linter
     {
         public enum Warnings
         {
-            S6603
+            S6603,
+            S6602
         }
         public static RootCommand AddLinter(this RootCommand rootCommand)
         {
-            var warningArgument = new Argument<Warnings>("warning", () => Warnings.S6603,"The warning to test the performance of");
-            var command = new Command("linter", "Tests performance implications of linter warnings") { warningArgument};
+            var warningArgument = new Argument<Warnings>("warning", () => Warnings.S6603, "The warning to test the performance of");
+            var command = new Command("linter", "Tests performance implications of linter warnings") { warningArgument };
             command.SetHandler((warning) =>
             {
-                switch (warning)
-                {
-                    case Warnings.S6603:
-                        BenchmarkRunner.Run<WarningS6603Tests>();
-                        break;
-                    default:
-                        throw new NotSupportedException($"Warning {warning} is not supported yet.");
-                }
+               BenchmarkRunner.Run(GetWarningTestType(warning));
             }, warningArgument);
             rootCommand.Add(command);
             return rootCommand;
         }
-    }
-    [InProcess]
-    public class WarningS6603Tests
-    {
-        private sealed class Item
+
+        private static Type GetWarningTestType(Warnings warning)
         {
-            public string Text { get;  } = string.Empty;
+            // Get all types that derive from WarningTest
+            var warningTestTypes = Assembly.GetAssembly(typeof(WarningTest))?
+                .GetTypes()
+                .Where(t => t.IsSubclassOf(typeof(WarningTest))).ToList() ?? [];
+
+            // Iterate through the warningTestTypes and find the first instance with a matching Warning type
+            foreach (var warningTestType in warningTestTypes)
+            {
+                var warningTestInstance = Activator.CreateInstance(warningTestType) as WarningTest;
+                if (warningTestInstance.Warning == warning)
+                {
+                    return warningTestType;
+                }
+            }
+
+            throw new NotSupportedException($"Warning of {warning} does not have a test implemented.");
         }
-        private List<Item> _list = new Faker<Item>()
-            .RuleFor(x=>x.Text, x=>x.Random.AlphaNumeric(10))
-            .Generate(1000000);
-        private Item[] _array = new Faker<Item>()
-            .RuleFor(x => x.Text, x => x.Random.AlphaNumeric(10))
-            .Generate(1000000)
-            .ToArray();
-
-        [Benchmark(Description="True For All List")]
-        public bool TrueForAllList() => _list.TrueForAll(x => x.Text.Length == 10);
-
-        [Benchmark(Description="True For All Array")]
-        public bool TrueForAllArray() => Array.TrueForAll(_array, x => x.Text.Length == 10);
-
-        [Benchmark(Description = "All List")]
-        public bool AllList() => _list.All(x => x.Text.Length == 10);
-
-        [Benchmark(Description = "All Array")]
-        public bool AllArray() => _array.All(x => x.Text.Length == 10);
     }
 }

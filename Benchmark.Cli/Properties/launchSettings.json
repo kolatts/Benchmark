@@ -7,6 +7,10 @@
     "bench linter s6603": {
       "commandName": "Project",
       "commandLineArgs": "linter s6603"
+    },
+    "bench linter s6602": {
+      "commandName": "Project",
+      "commandLineArgs": "linter s6602"
     }
   }
 }
