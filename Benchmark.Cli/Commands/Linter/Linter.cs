@@ -14,7 +14,8 @@ namespace Benchmark.Cli.Commands.Linter
         public enum Warnings
         {
             S6603,
-            S6602
+            S6602,
+            S6608
         }
         public static RootCommand AddLinter(this RootCommand rootCommand)
         {
