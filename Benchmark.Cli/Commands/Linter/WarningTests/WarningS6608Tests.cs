@@ -23,12 +23,10 @@ public class WarningS6608Tests : WarningTest
             .Generate(N);
         _array = _list
             .ToArray();
-        _searchValue = _list.Skip((N/2)).First().Text;
     }
 
     private List<Item>? _list;
     private Item[]? _array;
-    private string _searchValue = string.Empty;
 
     [Benchmark(Description = "Index 0 - List")]
     public Item FindList() => _list![0];
@@ -37,9 +35,9 @@ public class WarningS6608Tests : WarningTest
     public Item FindArray() => _array![0];
 
     [Benchmark(Description = "First - List")]
-    public Item FirstOrDefaultList() => _list!.First(x => x.Text == _searchValue);
+    public Item FirstOrDefaultList() => _list!.First();
 
     [Benchmark(Description = "First - Array")]
-    public Item FirstOrDefaultArray() => _array!.First(x => x.Text == _searchValue);
+    public Item FirstOrDefaultArray() => _array!.First();
 
 }
