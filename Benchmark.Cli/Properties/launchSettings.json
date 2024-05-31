@@ -3,6 +3,10 @@
     "bench primary-keys": {
       "commandName": "Project",
       "commandLineArgs": "primary-keys "
+    },
+    "bench linter s6603": {
+      "commandName": "Project",
+      "commandLineArgs": "linter s6603"
     }
   }
 }

@@ -1,5 +1,6 @@
 ﻿using System.CommandLine.Parsing;
 using Benchmark.Cli;
+using Benchmark.Cli.Commands.Linter;
 using Benchmark.Cli.Commands.PrimaryKeys;
 using Benchmark.Cli.Global;
 
@@ -8,7 +9,8 @@ var rootCommand = new RootCommand("EF Benchmark CLI") { Name = "efbench" };
 rootCommand.AddGlobalOption(DatabaseTypeOption.Value);
 rootCommand.AddGlobalOption(ConnectionStringOption.Value);
 //Commands
-rootCommand.AddPrimaryKeyCommand();
+rootCommand.AddPrimaryKeyCommand()
+    .AddLinter();
 
 
 var parser = new CommandLineBuilder(rootCommand)
