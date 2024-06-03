@@ -28,7 +28,7 @@ public class WarningS6605Tests : WarningTest
 
     private List<Item>? _list;
     private Item[]? _array;
-    private string _searchValue;
+    private string? _searchValue;
 
     [Benchmark(Description = "Exists List")]
     public bool ExistsList() => _list!.Exists(x => x.Text == _searchValue);
