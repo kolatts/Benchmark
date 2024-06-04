@@ -4,9 +4,9 @@ using Bogus;
 namespace Benchmark.Cli.Commands.Linter.WarningTests;
 
 [InProcess]
-public class WarningS6608Tests : WarningTest
+public class WarningCA1829Tests : WarningTest
 {
-    public override Linter.Warnings Warning => Linter.Warnings.S6608;
+    public override Linter.Warnings Warning => Linter.Warnings.CA1829;
 
     [Params(10, 1000, 100000, 1000000)]
     public int N;
@@ -28,16 +28,16 @@ public class WarningS6608Tests : WarningTest
     private List<Item>? _list;
     private Item[]? _array;
 
-    [Benchmark(Description = "Index 0 - List")]
-    public Item StandardList() => _list![0];
+    [Benchmark(Description = "Count Property - List")]
+    public int StandardList() => _list!.Count;
 
-    [Benchmark(Description = "Index 0 - Array")]
-    public Item StandardArray() => _array![0];
+    [Benchmark(Description = "Length Property - Array")]
+    public int StandardArray() => _array!.Length;
 
-    [Benchmark(Description = "First - List")]
-    public Item VariantList() => _list!.First();
+    [Benchmark(Description = "Enumerable.Count() - List")]
+    public int VariantList() => _list!.Count();
 
-    [Benchmark(Description = "First - Array")]
-    public Item VariantArray() => _array!.First();
+    [Benchmark(Description = "Enumerable.Count() - Array")]
+    public int VariantArray() => _array!.Count();
 
 }

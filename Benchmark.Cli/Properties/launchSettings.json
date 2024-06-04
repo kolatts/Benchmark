@@ -1,24 +1,32 @@
 {
   "profiles": {
-    "bench primary-keys": {
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
+    },
+    "efbench primary-keys": {
       "commandName": "Project",
       "commandLineArgs": "primary-keys "
     },
-    "bench linter s6603": {
+    "efbench linter ca1829": {
       "commandName": "Project",
-      "commandLineArgs": "linter s6603"
+      "commandLineArgs": "linter ca1829"
     },
-    "bench linter s6602": {
+    "efbench linter s6605": {
       "commandName": "Project",
-      "commandLineArgs": "linter s6602"
+      "commandLineArgs": "linter s6605"
     },
-    "bench linter s6608": {
+    "efbench linter s6608": {
       "commandName": "Project",
       "commandLineArgs": "linter s6608"
     },
-    "bench linter s6605": {
+    "efbench linter s6602": {
       "commandName": "Project",
-      "commandLineArgs": "linter s6605"
+      "commandLineArgs": "linter s6602"
+    },
+    "efbench linter s6603": {
+      "commandName": "Project",
+      "commandLineArgs": "linter s6603"
     }
   }
 }

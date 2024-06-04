@@ -16,7 +16,8 @@ namespace Benchmark.Cli.Commands.Linter
             S6603,
             S6602,
             S6605,
-            S6608
+            S6608,
+            CA1829
         }
         public static RootCommand AddLinter(this RootCommand rootCommand)
         {
