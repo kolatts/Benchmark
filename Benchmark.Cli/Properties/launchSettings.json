@@ -27,6 +27,10 @@
     "efbench linter s6603": {
       "commandName": "Project",
       "commandLineArgs": "linter s6603"
+    },
+    "efbench linter ca1860": {
+      "commandName": "Project",
+      "commandLineArgs": "linter ca1860"
     }
   }
 }
