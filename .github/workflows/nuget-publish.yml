@@ -34,6 +34,7 @@ jobs:
         uses: gittools/actions/gitversion/execute@v3.0.3
         with:
           useConfigFile: true
+          configFilePath: './GitVersion.yml'
           
       - name: Set NuGet version environment variable
         run: echo "NUGET_VERSION=${{ steps.version.outputs.SemVer }}" >> $GITHUB_ENV
