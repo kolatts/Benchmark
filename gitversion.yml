@@ -1,13 +1,9 @@
-mode: ContinuousDelivery
+mode: Mainline
 branches:
   main:
     regex: ^main$
     is-main-branch: true
     increment: Patch
-  develop:
-    regex: ^develop$
-    is-main-branch: false
-    increment: Minor
   feature:
     regex: ^features?[/-]
     is-main-branch: false
@@ -15,7 +11,7 @@ branches:
   release:
     regex: ^releases?[/-]
     is-main-branch: false
-    increment: Minor
+    increment: Inherit
   hotfix:
     regex: ^hotfix(es)?[/-]
     is-main-branch: false

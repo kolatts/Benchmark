@@ -37,7 +37,7 @@ jobs:
           configFilePath: './gitversion.yml'
           
       - name: Set NuGet version environment variable
-        run: echo "NUGET_VERSION=${{ steps.version.outputs.SemVer }}" >> $GITHUB_ENV
+        run: echo "NUGET_VERSION=${{ steps.version.outputs.MajorMinorPatch }}" >> $GITHUB_ENV
 
       - name: Restore dependencies
         run: dotnet restore Benchmark.Cli/Benchmark.Cli.csproj
