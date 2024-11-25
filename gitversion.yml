@@ -1,6 +1,30 @@
-mode: Mainline
+mode: ContinuousDelivery
 branches:
   main:
-    regex: ^latest$
+    regex: ^main$
+    is-main-branch: true
+    increment: Patch
+  develop:
+    regex: ^develop$
+    is-main-branch: false
+    increment: Minor
+  feature:
+    regex: ^features?[/-]
+    is-main-branch: false
+    increment: Inherit
+  release:
+    regex: ^releases?[/-]
+    is-main-branch: false
+    increment: Minor
+  hotfix:
+    regex: ^hotfix(es)?[/-]
+    is-main-branch: false
+    increment: Patch
+  support:
+    regex: ^support[/-]
+    is-main-branch: false
+    increment: Patch
   pull-request:
-    tag: pr
+    regex: ^pull-requests[/-]
+    is-main-branch: false
+    increment: Inherit
