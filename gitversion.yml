@@ -4,4 +4,3 @@ branches:
     regex: ^latest$
   pull-request:
     tag: pr
-next-version: 1.1.0
