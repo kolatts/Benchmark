@@ -25,14 +25,18 @@ jobs:
         uses: actions/setup-dotnet@v1
 
       - name: Install GitVersion.Tool
-        run: dotnet tool install --global GitVersion.Tool
+        uses: gittools/actions/gitversion/setup@v3.0.3
+        with:
+          versionSpec: '6.x'
 
-      - name: Determine version
+      - name: Determine Version
         id: version
-        run: dotnet-gitversion /config gitversion.yml /output json > version.json 
-
+        uses: gittools/actions/gitversion/execute@v3.0.3
+        with:
+          useConfigFile: true
+          
       - name: Set NuGet version environment variable
-        run: echo "NUGET_VERSION=$(jq -r '.SemVer' version.json)" >> $GITHUB_ENV
+        run: echo "NUGET_VERSION=${{ steps.version.outputs.SemVer }}" >> $GITHUB_ENV
 
       - name: Restore dependencies
         run: dotnet restore Benchmark.Cli/Benchmark.Cli.csproj
